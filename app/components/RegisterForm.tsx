@@ -1,8 +1,9 @@
 "use client"
 import { useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer, toast,  } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 type FormData = {
   username: string;
@@ -13,15 +14,18 @@ type FormData = {
   bio: string;
   gender: 'Male' | 'Female' | 'Other';
   termsAndConditions: boolean;
+  showPassword: boolean;
 };
 
 const RegisterForm: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const {
     register,
     handleSubmit,
     formState: { errors },
     watch,
+    reset
   } = useForm<FormData>();
 
   const password = watch('password');
@@ -33,6 +37,7 @@ const RegisterForm: React.FC = () => {
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       toast.success('Registration successful!');
+      reset();
     } catch (error) {
       toast.error('Registration failed. Please try again.');
     } finally {
@@ -50,6 +55,7 @@ const RegisterForm: React.FC = () => {
           type="text"
           id="username"
           className={`mt-1 p-2 w-full border rounded-md ${errors.username ? 'border-red-500' : 'border-gray-300'}`}
+          placeholder="Enter your username"
         />
         {errors.username && (
           <span className="text-xs text-red-500">Username must be 3-15 characters, alphanumeric including underscores.</span>
@@ -65,6 +71,7 @@ const RegisterForm: React.FC = () => {
           type="email"
           id="email"
           className={`mt-1 p-2 w-full border rounded-md ${errors.email ? 'border-red-500' : 'border-gray-300'}`}
+          placeholder="example@domain.com"
         />
         {errors.email && (
           <span className="text-xs text-red-500">Enter a valid email address.</span>
@@ -75,12 +82,21 @@ const RegisterForm: React.FC = () => {
         <label htmlFor="password" className="block text-sm font-medium text-gray-600">
           Password
         </label>
-        <input
-          {...register('password', { required: true, minLength: 8, pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/ })}
-          type="password"
-          id="password"
-          className={`mt-1 p-2 w-full border rounded-md ${errors.password ? 'border-red-500' : 'border-gray-300'}`}
-        />
+        <div className="relative">
+          <input
+            {...register('password', { required: true, minLength: 8, pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/ })}
+            type={showPassword ? 'text' : 'password'}
+            id="password"
+            className={`mt-1 p-2 w-full border rounded-md ${errors.password ? 'border-red-500' : 'border-gray-300'}`}
+          />
+          <button
+            type="button"
+            className="absolute inset-y-0 right-0 pr-3 flex items-center focus:outline-none"
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            {showPassword ? <FaEye /> : <FaEyeSlash />}
+          </button>
+        </div>
         {errors.password && (
           <span className="text-xs text-red-500">Password must be at least 8 characters and include uppercase, lowercase, number, and special character.</span>
         )}
@@ -124,6 +140,7 @@ const RegisterForm: React.FC = () => {
           {...register('bio', { maxLength: 300 })}
           id="bio"
           className={`mt-1 p-2 w-full border rounded-md ${errors.bio ? 'border-red-500' : 'border-gray-300'}`}
+          placeholder="Write a brief bio (max 300 characters)"
         />
         {errors.bio && (
           <span className="text-xs text-red-500">Bio should be less than 300 characters.</span>
